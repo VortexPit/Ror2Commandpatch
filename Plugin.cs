@@ -4,6 +4,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using RoR2;
 
 namespace LookingGlassCommandFix
 {
@@ -28,11 +29,20 @@ namespace LookingGlassCommandFix
                 Type targetType = AccessTools.TypeByName("LookingGlass.CommandItemCount.CommandItemCountClass");
                 if (targetType == null)
                 {
-                    Log.LogInfo("LookingGlass type not found. No patch applied (expected if LookingGlass is not installed).");
+                    Log.LogInfo("LookingGlass type not found. No patch applied (this is expected if LookingGlass is not installed).");
                     return;
                 }
 
-                MethodInfo submitChoice = AccessTools.Method(targetType, "SubmitChoice");
+                MethodInfo submitChoice = AccessTools.Method(
+                    targetType,
+                    "SubmitChoice",
+                    new[]
+                    {
+                        typeof(Action<PickupPickerController, int>),
+                        typeof(PickupPickerController),
+                        typeof(int)
+                    });
+
                 if (submitChoice == null)
                 {
                     Log.LogWarning("LookingGlass SubmitChoice method not found. Compatibility patch was not applied.");
@@ -57,21 +67,15 @@ namespace LookingGlassCommandFix
 
     internal static class SubmitChoicePatch
     {
-        public static bool Prefix(object __instance, Delegate orig, object self, int index)
+        public static bool Prefix(object __instance, Action<PickupPickerController, int> orig, PickupPickerController self, int index)
         {
-            if (self == null)
+            if (self == null || self.options == null)
             {
+                Plugin.Log?.LogWarning("SubmitChoice patch: picker controller or options was null; skipping submission.");
                 return false;
             }
 
-            Array options = AccessTools.Field(self.GetType(), "options")?.GetValue(self) as Array;
-            if (options == null)
-            {
-                Plugin.Log?.LogWarning("SubmitChoice patch: picker controller options were null; skipping submission.");
-                return false;
-            }
-
-            int optionCount = options.Length;
+            int optionCount = self.options.Length;
             bool originalInRange = IsValidOptionIndex(index, optionCount);
             int finalIndex = index;
 
@@ -89,11 +93,12 @@ namespace LookingGlassCommandFix
             }
             catch (Exception ex)
             {
-                Plugin.Log?.LogWarning($"SubmitChoice patch: failed to read LookingGlass optionMap, falling back to original index. Error: {ex.Message}");
+                Plugin.Log?.LogWarning($"SubmitChoice patch: failed to read LookingGlass optionMap. Falling back to original index. Error: {ex.Message}");
                 finalIndex = index;
             }
 
             bool finalInRange = IsValidOptionIndex(finalIndex, optionCount);
+
             if (!finalInRange && originalInRange)
             {
                 finalIndex = index;
@@ -106,21 +111,7 @@ namespace LookingGlassCommandFix
                 return false;
             }
 
-            if (orig == null)
-            {
-                Plugin.Log?.LogWarning("SubmitChoice patch: orig delegate was null; cannot submit selection.");
-                return false;
-            }
-
-            try
-            {
-                orig.DynamicInvoke(self, finalIndex);
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log?.LogError($"SubmitChoice patch: invoking original SubmitChoice delegate failed: {ex}");
-            }
-
+            orig?.Invoke(self, finalIndex);
             return false;
         }
 
@@ -140,7 +131,8 @@ namespace LookingGlassCommandFix
                     return false;
                 }
 
-                if (list[index] is int i)
+                object value = list[index];
+                if (value is int i)
                 {
                     mappedIndex = i;
                     return true;
@@ -149,14 +141,16 @@ namespace LookingGlassCommandFix
                 return false;
             }
 
-            if (optionMapRaw is Array array)
+            if (optionMapRaw.GetType().IsArray)
             {
+                Array array = (Array)optionMapRaw;
                 if (index >= array.Length)
                 {
                     return false;
                 }
 
-                if (array.GetValue(index) is int i)
+                object value = array.GetValue(index);
+                if (value is int i)
                 {
                     mappedIndex = i;
                     return true;

@@ -22,16 +22,6 @@ Use this mod if you:
 - LookingGlass (target being patched)
 - CommandQueueExtended (the queueing behavior this patch is intended to keep compatible)
 
-
-## Where is the DLL?
-Yes — Risk of Rain 2 loads a compiled `.dll` plugin from `BepInEx/plugins`.
-
-This repository contains **source code** only. The DLL is produced when you build the project in Visual Studio 2022:
-- Build output: `bin/Release/LookingGlassCommandFix.dll` (or `bin/Release/net472/LookingGlassCommandFix.dll` depending on MSBuild layout).
-- That built DLL is the file you install into your r2modman profile plugins folder.
-
-The DLL is not committed to source control by default so releases stay clean and reproducible.
-
 ## Installation (r2modman)
 1. Build `LookingGlassCommandFix.dll`.
 2. In your profile path, create (if needed):
