@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>LookingGlassCommandFix</AssemblyName>
+    <RootNamespace>LookingGlassCommandFix</RootNamespace>
+    <Nullable>disable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DebugType>portable</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Primary references (exact local paths requested for VS/r2modman profile builds) -->
+  <ItemGroup Condition="Exists('C:\Users\SwanerPc\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Vannilaplus\BepInEx\core\BepInEx.dll')">
+    <Reference Include="BepInEx">
+      <HintPath>C:\Users\SwanerPc\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Vannilaplus\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>C:\Users\SwanerPc\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Vannilaplus\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>H:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>H:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Fallback for CI/non-Windows environments to allow producing the DLL -->
+  <ItemGroup Condition="!Exists('C:\Users\SwanerPc\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Vannilaplus\BepInEx\core\BepInEx.dll')">
+    <Reference Include="BepInEx">
+      <HintPath>.deps/BepInEx/core/BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>.deps/BepInEx/core/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="UnityEngine" Version="1.0.0" />
+  </ItemGroup>
+</Project>

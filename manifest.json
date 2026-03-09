@@ -1,0 +1,10 @@
+{
+  "name": "LookingGlassCommandFix",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Bryndan/LookingGlassCommandFix",
+  "description": "Compatibility fix for LookingGlass + CommandQueueExtended command selections.",
+  "dependencies": [
+    "bbepis-BepInExPack-5.4.2105",
+    "BepInEx-HarmonyX-2.10.0"
+  ]
+}
